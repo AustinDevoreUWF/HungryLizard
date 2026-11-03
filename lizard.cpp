@@ -20,12 +20,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <semaphore.h>
 
 #include <iostream>
 #include <thread>
 #include <mutex>
 #include <vector>
-
+#include <random>
+#include <chrono>
 
 using namespace std;
 
@@ -157,9 +159,19 @@ int Cat::getId()
  * 
  * Status: Incomplete - Make changes to this code.
  */
- void Cat::run() 
+ void Cat::run() //AD
  {
-	 // launch the thread to simulate the cat's behavior	 
+	 // launch the thread to simulate the cat's behavior
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dis(0.0,3.0);
+
+      while(!WORLDEND){
+        double sleep_time {dis(gen)};
+        std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
+        if(lizard_semaphore)
+    }
+
 	 
  }
  
@@ -617,12 +629,17 @@ void Lizard::lizardThread(Lizard *aLizard)
  * Should block until all threads have terminated
  * Status: Incomplete - Make changes to this code.
  */
+
+sem_t lizard_semaphore;
+int lizards_crossing{};
+
 int main(int argc, char **argv)
 {
 	/*
 	 * Declare local variables
      */
-
+  sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING);
+  //sme_getvalue()returns error code, but changes value of sVal passed in so you need to pass in the address of val.
 
 
 
