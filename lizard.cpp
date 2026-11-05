@@ -522,7 +522,7 @@ void Lizard::crossMonkeyGrass2Sago()
       cout << "\tOh No!, the lizards have cats all over them." << endl;
       cout << "\t " << numCrossingSago2MonkeyGrass << " crossing sago -> monkey grass" << endl;
       cout << "\t " << numCrossingMonkeyGrass2Sago << " crossing monkey grass -> sago" << endl;
-      crossing_mutex.unlock();
+      crossing_mutex.unlock();// if err, unlock before termination. AD
       exit( -1 );
       }
   crossing_mutex.unlock();          //AD
@@ -557,7 +557,7 @@ void Lizard::madeIt2Sago()
 		cout << "[" << _id << "] made the  monkey grass -> sago  crossing" << endl;
 		cout << flush;
     }
-    sem_post(&lizard_semaphore);
+    sem_post(&lizard_semaphore); //AD
 }
 
 /**
