@@ -159,7 +159,7 @@ int Cat::getId()
  * 
  * Status: Incomplete - Make changes to this code.
  */
- void Cat::run()//COMPLETE
+ void Cat::run()
  {
 	_catThread = new thread(catThread,this); //AD
  }
@@ -169,10 +169,12 @@ int Cat::getId()
   *
   * Status: Incomplete - Make changes to this code.
   */
- void Cat::wait()//INCOMPLETE
+ void Cat::wait()
  {
 	 // wait for the thread to terminate
-
+  if(_catThread != NULL){ //AD
+    _catThread->join();   //AD
+  }
  }
  
  
@@ -360,7 +362,8 @@ void Lizard::sago2MonkeyGrassIsSafe()
 		cout << "[" << _id << "] checking  sago -> monkey grass" << endl;
 		cout << flush;
     }
-
+//use semaphore here to say can go monkey grass
+    sem_wait(&lizard_semaphore);
 	
 
 
@@ -621,18 +624,13 @@ void Lizard::lizardThread(Lizard *aLizard)
  */
 
 sem_t lizard_semaphore;
-int lizards_crossing{};
+sem_t cat_semaphore;
 
 int main(int argc, char **argv)
 {
 	/*
 	 * Declare local variables
      */
-  sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING);
-
-  //sem_getvalue()returns error code, but changes value of sVal passed in so you need to pass in the address of val.
-
-
 
 	/*
      * Check for the debugging flag (-d)
@@ -660,7 +658,8 @@ int main(int argc, char **argv)
 	/*
      * Initialize locks and/or semaphores
      */
-
+    sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING); //AD
+    sem_init(&cat_semaphore,0,MAX_CAT_SLEEP);
 
 
 
@@ -676,13 +675,19 @@ int main(int argc, char **argv)
     /*
      * Create NUM_CATS cat threads
      */
-	 
+    vector<Cat*> allCats;            //AD
+    for(int i=0;i<NUM_CATS;i++){     //AD
+      allCats.push_back(new Cat(i)); //AD
+    }
 
 	/*
 	 * Run NUM_LIZARDS and NUM_CATS threads
 	 */
     for (int i=0; i < NUM_LIZARDS; i++) {
         allLizards[i]->run();
+    }
+    for(int i=0;i<NUM_CATS; i++){ //AD
+      allCats[i]->run();          
     }
 
 	/*
@@ -700,24 +705,28 @@ int main(int argc, char **argv)
     /*
      * Wait until all threads terminate
      */
-
-
-
-
-
+    for(int i=0;i<NUM_LIZARDS;i++){ //AD
+      allLizards[i]->wait();
+    }
+    for(int i=0;i<NUM_CATS;i++){    //AD
+      allCats[i]->wait();
+    }
 
 	/*
      * Delete the locks and semaphores
      */
-	 
+
 	 
 	 
 	/*
 	 * Delete all cat and lizard objects
 	 */
- 
-
-
+ 	 for(int i=0;i<NUM_LIZARDS;i++){ //AD
+    delete allLizards[i];
+   }
+   for(int i=0;i<NUM_CATS;i++){    //AD
+    delete allCats[i];
+   }
 
 	/*
      * Exit happily
