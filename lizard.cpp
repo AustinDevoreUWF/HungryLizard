@@ -362,10 +362,8 @@ void Lizard::sago2MonkeyGrassIsSafe()
 		cout << "[" << _id << "] checking  sago -> monkey grass" << endl;
 		cout << flush;
     }
-//use semaphore here to say can go monkey grass
-    sem_wait(&lizard_semaphore);
-	
-
+  
+    sem_wait(&lizard_semaphore);  //AD
 
 	if (debug)
     {
@@ -382,7 +380,7 @@ void Lizard::sago2MonkeyGrassIsSafe()
  *
  * Status: Incomplete - Make changes as you see are necessary.
  */
-void Lizard::crossSago2MonkeyGrass()
+void Lizard::crossSago2MonkeyGrass() //Could add a semaphore on the incre/decre-menting
 {
 	if (debug)
     {
@@ -393,7 +391,7 @@ void Lizard::crossSago2MonkeyGrass()
 	/*
 	 * One more crossing this way
 	 */
-	numCrossingSago2MonkeyGrass++;
+	numCrossingSago2MonkeyGrass++;  
 
 	/*
      * Check for lizards cross both ways
@@ -434,10 +432,8 @@ void Lizard::madeIt2MonkeyGrass()
 		cout << "[" << _id << "] made the  sago -> monkey grass  crossing" << endl;
 		cout << flush;
     }
-
-
-
-
+    //call signal which releases a lock(updates the count) so others can respond
+    sem_post(&lizard_semaphore); //AD
 
 }
 
@@ -487,9 +483,7 @@ void Lizard::monkeyGrass2SagoIsSafe()
 		cout << flush;
     }
 
-
-
-
+    sem_wait(&lizard_semaphore); //AD
 
 	if (debug)
     {
@@ -517,19 +511,21 @@ void Lizard::crossMonkeyGrass2Sago()
     /*
      * One more crossing this way
      */
-	numCrossingMonkeyGrass2Sago++;
-
-  
-    /*
-     * Check for lizards cross both ways
-     */
-	if (numCrossingSago2MonkeyGrass && UNIDIRECTIONAL)
-    {
-		cout << "\tOh No!, the lizards have cats all over them." << endl;
-		cout << "\t " << numCrossingSago2MonkeyGrass << " crossing sago -> monkey grass" << endl;
-		cout << "\t " << numCrossingMonkeyGrass2Sago << " crossing monkey grass -> sago" << endl;
-		exit( -1 );
-    }
+    //must use a mutex here for the lizards updates to be counted correctly.
+  crossing_mutex.lock();            //AD
+    numCrossingMonkeyGrass2Sago++;  //AD
+      /*
+      * Check for lizards cross both ways
+      */
+    if (numCrossingSago2MonkeyGrass && UNIDIRECTIONAL)
+      {
+      cout << "\tOh No!, the lizards have cats all over them." << endl;
+      cout << "\t " << numCrossingSago2MonkeyGrass << " crossing sago -> monkey grass" << endl;
+      cout << "\t " << numCrossingMonkeyGrass2Sago << " crossing monkey grass -> sago" << endl;
+      crossing_mutex.unlock();
+      exit( -1 );
+      }
+  crossing_mutex.unlock();          //AD
 
 	/*
      * It takes a while to cross, so simulate it
@@ -539,7 +535,9 @@ void Lizard::crossMonkeyGrass2Sago()
 	/*
      * That one seems to have made it
      */
-	numCrossingMonkeyGrass2Sago--;
+  crossing_mutex.lock();            //AD
+	  numCrossingMonkeyGrass2Sago--;  //AD
+  crossing_mutex.unlock();          //AD
 }
 
 
@@ -559,6 +557,7 @@ void Lizard::madeIt2Sago()
 		cout << "[" << _id << "] made the  monkey grass -> sago  crossing" << endl;
 		cout << flush;
     }
+    sem_post(&lizard_semaphore);
 }
 
 /**
@@ -623,8 +622,9 @@ void Lizard::lizardThread(Lizard *aLizard)
  * Status: Incomplete - Make changes to this code.
  */
 
-sem_t lizard_semaphore;
-sem_t cat_semaphore;
+sem_t lizard_semaphore; //AD
+sem_t cat_semaphore;    //AD
+mutex crossing_mutex;   //AD
 
 int main(int argc, char **argv)
 {
@@ -660,8 +660,6 @@ int main(int argc, char **argv)
      */
     sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING); //AD
     sem_init(&cat_semaphore,0,MAX_CAT_SLEEP);
-
-
 
 	/*
      * Create NUM_LIZARDS lizard threads
@@ -715,7 +713,7 @@ int main(int argc, char **argv)
 	/*
      * Delete the locks and semaphores
      */
-
+    sem_destroy(&lizard_semaphore); // AD
 	 
 	 
 	/*
