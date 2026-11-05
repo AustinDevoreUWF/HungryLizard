@@ -391,7 +391,8 @@ void Lizard::crossSago2MonkeyGrass() //Could add a semaphore on the incre/decre-
 	/*
 	 * One more crossing this way
 	 */
-	numCrossingSago2MonkeyGrass++;  
+  crossing_mutex.lock();          //AD
+	numCrossingSago2MonkeyGrass++;  //AD
 
 	/*
      * Check for lizards cross both ways
@@ -401,9 +402,10 @@ void Lizard::crossSago2MonkeyGrass() //Could add a semaphore on the incre/decre-
 		cout << "\tCrash!  We have a pile-up on the concrete." << endl;
 		cout << "\t" << numCrossingSago2MonkeyGrass << " crossing sago -> monkey grass" << endl;
 		cout << "\t" << numCrossingMonkeyGrass2Sago << " crossing monkey grass -> sago" << endl;
-		exit( -1 );
+		crossing_mutex.unlock();  //AD
+    exit( -1 );
     }
-
+    crossing_mutex.unlock();  //AD
 
 	/*
      * It takes a while to cross, so simulate it
@@ -413,8 +415,10 @@ void Lizard::crossSago2MonkeyGrass() //Could add a semaphore on the incre/decre-
     /*
      * That one seems to have made it
      */
-    numCrossingSago2MonkeyGrass--;
-}
+    crossing_mutex.lock();            //AD
+      numCrossingSago2MonkeyGrass--;  //AD
+    crossing_mutex.unlock();          //AD
+    } 
 
 
 /**
@@ -588,24 +592,19 @@ void Lizard::lizardThread(Lizard *aLizard)
        * some functions by filling in the code.  Some  
        * are already completed - see the comments.
        */
+      // randomize sleep
+      aLizard->sleepNow();              //AD
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      aLizard->sago2MonkeyGrassIsSafe();//AD
+      aLizard->crossSago2MonkeyGrass(); //AD
+        aLizard->madeIt2MonkeyGrass();  //AD
+      
+          aLizard->eat();                 //AD
+      
+      aLizard->monkeyGrass2SagoIsSafe();//AD
+      aLizard->crossMonkeyGrass2Sago(); //AD
+        aLizard->madeIt2Sago();         //AD
+        
     }
 
 }
@@ -631,6 +630,8 @@ int main(int argc, char **argv)
 	/*
 	 * Declare local variables
      */
+    vector<Cat*> allCats;            //AD
+    vector<Lizard*> allLizards;      //AD
 
 	/*
      * Check for the debugging flag (-d)
@@ -659,12 +660,11 @@ int main(int argc, char **argv)
      * Initialize locks and/or semaphores
      */
     sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING); //AD
-    sem_init(&cat_semaphore,0,MAX_CAT_SLEEP);
+    sem_init(&cat_semaphore,0,MAX_CAT_SLEEP);            //AD
 
 	/*
      * Create NUM_LIZARDS lizard threads
      */
-    vector<Lizard*> allLizards;
     for (int i=0; i < NUM_LIZARDS; i++) {
 	    allLizards.push_back(new Lizard(i));
     }    
@@ -673,7 +673,6 @@ int main(int argc, char **argv)
     /*
      * Create NUM_CATS cat threads
      */
-    vector<Cat*> allCats;            //AD
     for(int i=0;i<NUM_CATS;i++){     //AD
       allCats.push_back(new Cat(i)); //AD
     }
@@ -681,11 +680,11 @@ int main(int argc, char **argv)
 	/*
 	 * Run NUM_LIZARDS and NUM_CATS threads
 	 */
-    for (int i=0; i < NUM_LIZARDS; i++) {
+    for (int i=0; i < NUM_LIZARDS; i++) { //AD
         allLizards[i]->run();
     }
     for(int i=0;i<NUM_CATS; i++){ //AD
-      allCats[i]->run();          
+      allCats[i]->run();          //AD  
     }
 
 	/*
@@ -704,26 +703,26 @@ int main(int argc, char **argv)
      * Wait until all threads terminate
      */
     for(int i=0;i<NUM_LIZARDS;i++){ //AD
-      allLizards[i]->wait();
+      allLizards[i]->wait();        //AD
     }
     for(int i=0;i<NUM_CATS;i++){    //AD
-      allCats[i]->wait();
+      allCats[i]->wait();           //AD
     }
 
 	/*
      * Delete the locks and semaphores
      */
     sem_destroy(&lizard_semaphore); // AD
-	 
+    sem_destroy(&cat_semaphore);    //AD
 	 
 	/*
 	 * Delete all cat and lizard objects
 	 */
  	 for(int i=0;i<NUM_LIZARDS;i++){ //AD
-    delete allLizards[i];
+    delete allLizards[i];          //AD
    }
    for(int i=0;i<NUM_CATS;i++){    //AD
-    delete allCats[i];
+    delete allCats[i];             //AD
    }
 
 	/*
