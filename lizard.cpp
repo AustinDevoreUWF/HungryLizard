@@ -159,20 +159,9 @@ int Cat::getId()
  * 
  * Status: Incomplete - Make changes to this code.
  */
- void Cat::run() //AD
+ void Cat::run()//COMPLETE
  {
-	 // launch the thread to simulate the cat's behavior
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dis(0.0,3.0);
-
-      while(!WORLDEND){
-        double sleep_time {dis(gen)};
-        std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
-        if(lizard_semaphore)
-    }
-
-	 
+	_catThread = new thread(catThread,this); //AD
  }
  
  /**
@@ -180,9 +169,10 @@ int Cat::getId()
   *
   * Status: Incomplete - Make changes to this code.
   */
- void Cat::wait()
+ void Cat::wait()//INCOMPLETE
  {
 	 // wait for the thread to terminate
+
  }
  
  
@@ -238,7 +228,7 @@ void Cat::catThread (Cat *aCat)
 	while(running)
     {
 		aCat->sleepNow();
-
+      
 
 
 		/*
@@ -639,7 +629,8 @@ int main(int argc, char **argv)
 	 * Declare local variables
      */
   sem_init(&lizard_semaphore, 0, MAX_LIZARD_CROSSING);
-  //sme_getvalue()returns error code, but changes value of sVal passed in so you need to pass in the address of val.
+
+  //sem_getvalue()returns error code, but changes value of sVal passed in so you need to pass in the address of val.
 
 
 
