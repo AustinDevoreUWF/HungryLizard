@@ -16,6 +16,9 @@
 
 #include <iostream>
 
+#include <ctime>
+#include <cstdlib>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -97,6 +100,9 @@ using namespace std;
  * Declare global variables here
  */
 
+sem_t lizard_semaphore; //AD
+sem_t cat_semaphore;    //AD
+mutex crossing_mutex;   //AD
 
 /**************************************************/
 /* Please leave these variables alone.  They are  */
@@ -190,7 +196,7 @@ void Cat::sleepNow()
 {
 	int sleepSeconds;
 
-	sleepSeconds = 1 + (int)(random() / (double)RAND_MAX * MAX_CAT_SLEEP);
+	sleepSeconds = 1 + (int)(rand() / (double)RAND_MAX * MAX_CAT_SLEEP);
 
 	if (debug)
     {
@@ -327,7 +333,7 @@ void Lizard::sleepNow()
 {
 	int sleepSeconds;
 
-	sleepSeconds = 1 + (int)(random() / (double)RAND_MAX * MAX_LIZARD_SLEEP);
+	sleepSeconds = 1 + (int)(rand() / (double)RAND_MAX * MAX_LIZARD_SLEEP);
 
 	if (debug)
     {
@@ -451,7 +457,7 @@ void Lizard::eat()
 {
 	int eatSeconds;
 
-	eatSeconds = 1 + (int)(random() / (double)RAND_MAX * MAX_LIZARD_EAT);
+	eatSeconds = 1 + (int)(rand() / (double)RAND_MAX * MAX_LIZARD_EAT);
 
 	if (debug)
     {
@@ -621,9 +627,7 @@ void Lizard::lizardThread(Lizard *aLizard)
  * Status: Incomplete - Make changes to this code.
  */
 
-sem_t lizard_semaphore; //AD
-sem_t cat_semaphore;    //AD
-mutex crossing_mutex;   //AD
+
 
 int main(int argc, char **argv)
 {
@@ -653,7 +657,7 @@ int main(int argc, char **argv)
 	/*
      * Initialize random number generator
 	 */
-	srandom( (unsigned int)time(NULL) );
+	srand( (unsigned int)time(NULL) );
 
 
 	/*
