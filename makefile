@@ -2,13 +2,13 @@ CXX = g++
 CXXFLAGS = -g -Wall -std=c++11
 LDFLAGS = -pthread
 
-all:lizard
+all:lizards
 
-lizard.o: lizard.cpp
-	$(CXX) $(CXXFLAGS) -c lizard.cpp -o lizard.o
+lizards.o: lizards.cpp
+	$(CXX) $(CXXFLAGS) -c lizards.cpp -o lizards.o
 
-lizard: lizard.o
-	$(CXX) $(CXXFLAGS) lizard.o -o lizard $(LDFLAGS)
+lizards: lizards.o
+	$(CXX) $(CXXFLAGS) lizards.o -o lizards $(LDFLAGS)
 
 clean:
-	rm -f lizard.o lizard
+	rm -f lizards.o lizards
